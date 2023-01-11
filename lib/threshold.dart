@@ -10,15 +10,15 @@ String _lzstring({String? compress, String? decompress}) => decompress != null
     : "!${LZString.compressToBase64Sync(compress ?? "error")!}";
 
 String _bzip2({String? compress, String? decompress}) => decompress != null
-    ? base64Encode(BZip2Decoder().decodeBytes(decompress.codeUnits))
+    ? base64Encode(BZip2Decoder().decodeBytes(base64Decode(decompress)))
     : "@${base64Encode(BZip2Encoder().encode((compress ?? "error").codeUnits))}";
 
 String _gzip({String? compress, String? decompress}) => decompress != null
-    ? base64Encode(GZipDecoder().decodeBytes(decompress.codeUnits))
+    ? base64Encode(GZipDecoder().decodeBytes(base64Decode(decompress)))
     : "*${base64Encode(GZipEncoder().encode((compress ?? "error").codeUnits, level: 9)!)}";
 
 String _zlib({String? compress, String? decompress}) => decompress != null
-    ? base64Encode(const ZLibDecoder().decodeBytes(decompress.codeUnits))
+    ? base64Encode(const ZLibDecoder().decodeBytes(base64Decode(decompress)))
     : "^${base64Encode(const ZLibEncoder().encode((compress ?? "error").codeUnits, level: 9))}";
 
 String debugCompress(String data) {
