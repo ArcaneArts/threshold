@@ -1,9 +1,11 @@
 name: threshold
 description: Threshold string compression with multiple GZip, LZString, ZLib, BZip2
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/ArcaneArts/threshold
 environment:
   sdk: '>=2.18.6 <3.0.0'
 dependencies:
   archive: ^3.3.5
   lzstring: ^2.0.0+2
+dev_dependencies:
+  test: ^1.22.1
