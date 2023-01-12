@@ -9,6 +9,8 @@ void main() {
   ];
 
   for (String i in comp) {
+    debugCompress(i);
+
     test('Test Compression', () {
       expect(i, equals(decompress(compress(i))));
     });
@@ -32,6 +34,13 @@ void main() {
           i,
           equals(compressGzip(
               decompress: compressGzip(compress: i).substring(1))));
+    });
+
+    test('Test Compression Noop B64', () {
+      expect(
+          i,
+          equals(compressNoopEncode(
+              decompress: compressNoopEncode(compress: i).substring(1))));
     });
   }
 }

@@ -5,6 +5,11 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:lzstring/lzstring.dart';
 
+String compressNoopEncode({String? compress, String? decompress}) =>
+    decompress != null
+        ? String.fromCharCodes(base64Decode(decompress))
+        : "#${base64UrlEncode(compress?.codeUnits ?? "error".codeUnits)}";
+
 String compressLzstring({String? compress, String? decompress}) =>
     decompress != null
         ? LZString.decompressFromBase64Sync(decompress)!
@@ -13,22 +18,23 @@ String compressLzstring({String? compress, String? decompress}) =>
 String compressBzip2({String? compress, String? decompress}) => decompress !=
         null
     ? String.fromCharCodes(BZip2Decoder().decodeBytes(base64Decode(decompress)))
-    : "@${base64Encode(BZip2Encoder().encode((compress ?? "error").codeUnits))}";
+    : "@${base64UrlEncode(BZip2Encoder().encode((compress ?? "error").codeUnits))}";
 
 String compressGzip({String? compress, String? decompress}) => decompress !=
         null
     ? String.fromCharCodes(GZipDecoder().decodeBytes(base64Decode(decompress)))
-    : "*${base64Encode(GZipEncoder().encode((compress ?? "error").codeUnits, level: 9)!)}";
+    : "*${base64UrlEncode(GZipEncoder().encode((compress ?? "error").codeUnits, level: 9)!)}";
 
 String compressZLib({String? compress, String? decompress}) => decompress !=
         null
     ? String.fromCharCodes(
         const ZLibDecoder().decodeBytes(base64Decode(decompress)))
-    : "^${base64Encode(const ZLibEncoder().encode((compress ?? "error").codeUnits, level: 9))}";
+    : "^${base64UrlEncode(const ZLibEncoder().encode((compress ?? "error").codeUnits, level: 9))}";
 
 String debugCompress(String data) {
   Map<String, String?> all = {
     "RAW": data,
+    "NOP": _attempt(() => compressNoopEncode(compress: data)),
     "LZS": _attempt(() => compressLzstring(compress: data)),
     "BZ2": _attempt(() => compressBzip2(compress: data)),
     "GZI": _attempt(() => compressGzip(compress: data)),
@@ -52,9 +58,12 @@ String? _attempt(String Function() f) {
   }
 }
 
-String compress(String data) =>
+String compress(String data, {bool forceEncode = false}) =>
     [
-      data,
+      if (forceEncode)
+        _attempt(() => compressNoopEncode(compress: data))
+      else
+        data,
       _attempt(() => compressLzstring(compress: data)),
       _attempt(() => compressBzip2(compress: data)),
       _attempt(() => compressGzip(compress: data)),
@@ -73,6 +82,8 @@ String decompress(String data) {
     return compressGzip(decompress: data.substring(1));
   } else if (data.substring(0, 1) == "^") {
     return compressZLib(decompress: data.substring(1));
+  } else if (data.substring(0, 1) == "#") {
+    return compressNoopEncode(decompress: data.substring(1));
   } else {
     return data;
   }
