@@ -1,3 +1,7 @@
+## 1.0.4
+
+* Allow or deny compression methods on compress method.
+
 ## 1.0.3
 
 * No-Op force encoding option

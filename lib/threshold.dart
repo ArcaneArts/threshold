@@ -58,16 +58,18 @@ String? _attempt(String Function() f) {
   }
 }
 
-String compress(String data, {bool forceEncode = false}) =>
+String compress(String data,
+        {bool forceEncode = false,
+        bool allowLZString = true,
+        bool allowBZip2 = true,
+        bool allowGZip = true,
+        bool allowZLib = true}) =>
     [
-      if (forceEncode)
-        _attempt(() => compressNoopEncode(compress: data))
-      else
-        data,
-      _attempt(() => compressLzstring(compress: data)),
-      _attempt(() => compressBzip2(compress: data)),
-      _attempt(() => compressGzip(compress: data)),
-      _attempt(() => compressZLib(compress: data)),
+      forceEncode ? _attempt(() => compressNoopEncode(compress: data)) : data,
+      if (allowLZString) _attempt(() => compressLzstring(compress: data)),
+      if (allowBZip2) _attempt(() => compressBzip2(compress: data)),
+      if (allowGZip) _attempt(() => compressGzip(compress: data)),
+      if (allowZLib) _attempt(() => compressZLib(compress: data)),
     ]
         .where((element) => element != null)
         .reduce((a, b) => a!.length < b!.length ? a : b) ??
